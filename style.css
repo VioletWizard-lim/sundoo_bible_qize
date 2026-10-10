@@ -117,35 +117,109 @@ main {
 .hero-desc { margin: 0; color: var(--muted); font-size: 14px; }
 .notice { margin: 18px 4px 0; color: var(--muted); font-size: 13px; text-align: center; }
 
-/* 아래 탭 */
-body.has-tabbar main { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+/* 아래 탭: 넓은 화면에서도 가운데에 적당한 폭으로 뜹니다 */
+body.has-tabbar main { padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
 .tabbar {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  left: 50%;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
   z-index: 5;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  width: min(calc(100% - 32px), 420px);
+  padding: 6px;
+  transform: translateX(-50%);
   background: var(--card);
-  border-top: 1px solid var(--line);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .12);
 }
 .tabbar button {
   display: grid;
   justify-items: center;
-  gap: 2px;
+  gap: 1px;
   padding: 6px 0;
   border: 0;
-  border-radius: 12px;
+  border-radius: 16px;
   background: transparent;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
 }
 .tab-icon { font-size: 20px; line-height: 1.2; filter: grayscale(1); opacity: .6; }
 .tabbar button.active { color: var(--brand); background: var(--brand-soft); }
 .tabbar button.active .tab-icon { filter: none; opacity: 1; }
+
+/* 홈 */
+.subject-list { display: grid; gap: 12px; margin-top: 16px; }
+.subject-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 18px 16px;
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.subject-card:active, .week-card:active { transform: scale(.99); }
+.subject-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border-radius: 14px;
+  font-size: 26px;
+  background: var(--brand-soft);
+}
+.subject-exam .subject-icon { background: var(--blue-soft); }
+.subject-body { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.subject-body strong { font-size: 19px; }
+.subject-body small { color: var(--muted); font-size: 13px; }
+.subject-next {
+  justify-self: start;
+  margin-top: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 700;
+}
+.chev { font-size: 26px; color: var(--muted); line-height: 1; }
+
+.week-card {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px 12px;
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.week-title { display: flex; align-items: center; justify-content: space-between; padding: 0 4px; }
+.week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.week-day { display: grid; gap: 4px; justify-items: center; }
+.week-label { font-size: 12px; color: var(--muted); }
+.week-cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 100%;
+  border-radius: 10px;
+  background: var(--bg);
+}
+.week-day.today .week-cell { outline: 2px solid var(--brand); outline-offset: -2px; }
 
 /* 과목 화면 */
 .today-banner {

@@ -128,7 +128,8 @@
   });
 
   function showTab(tab) {
-    if (tab === "stamps") showStamps();
+    if (tab === "home") showHome();
+    else if (tab === "stamps") showStamps();
     else showSubject(tab);
   }
 
@@ -151,15 +152,70 @@
     ]);
   }
 
+  function dailyStartFor(key) {
+    var st = subjectState(key);
+    var logged = st.dailyLog[dateKey()];
+    return logged != null ? logged : st.dailyPointer;
+  }
+
+  function stampMark(kind) {
+    return kind ? h("span", { class: "stamp " + kind, text: kind === "done" ? "완료" : "출석" }) : null;
+  }
+
+  // ---------- 홈 탭 ----------
+  function showHome() {
+    stamp("attend");
+    var cards = Object.keys(SUBJECTS).map(function (key) {
+      var sub = SUBJECTS[key];
+      var start = dailyStartFor(key);
+      var total = sub.questions.length;
+      return h("button", { class: "subject-card subject-" + key, onclick: function () { showSubject(key); } }, [
+        h("span", { class: "subject-icon", "aria-hidden": "true", text: sub.icon }),
+        h("span", { class: "subject-body" }, [
+          h("strong", { text: sub.name }),
+          h("small", { text: sub.desc }),
+          h("span", { class: "subject-next", text: "오늘 " + (start + 1) + "–" + Math.min(start + 5, total) + "번 차례" })
+        ]),
+        h("span", { class: "chev", "aria-hidden": "true", text: "›" })
+      ]);
+    });
+
+    // 이번 주(일~토) 도장
+    var now = new Date();
+    var sunday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+    var todayKey = dateKey();
+    var week = h("div", { class: "week" }, ["일", "월", "화", "수", "목", "금", "토"].map(function (label, i) {
+      var day = new Date(sunday.getFullYear(), sunday.getMonth(), sunday.getDate() + i);
+      var k = dateKey(day);
+      return h("div", { class: "week-day" + (k === todayKey ? " today" : "") }, [
+        h("span", { class: "week-label", text: label }),
+        h("span", { class: "week-cell" }, [h("span", { class: "cal-day", text: String(day.getDate()) }), stampMark(store.stamps[k])])
+      ]);
+    }));
+
+    setScreen("인천노회 성경 예상문제", null, [
+      h("section", { class: "hero" }, [
+        h("p", { class: "hero-sub", text: EVENT_NAME }),
+        h("h2", { text: "성경 예상문제" }),
+        h("p", { class: "hero-desc", text: "오늘은 무엇을 공부할까요?" })
+      ]),
+      todayBanner(),
+      h("div", { class: "subject-list" }, cards),
+      h("button", { class: "week-card", onclick: function () { showStamps(); } }, [
+        h("span", { class: "week-title" }, [h("strong", { text: "이번 주 도장" }), h("span", { class: "chev", "aria-hidden": "true", text: "›" })]),
+        week
+      ]),
+      h("p", { class: "notice", text: "실제 대회 문제가 아닌 예상문제입니다." })
+    ], "home");
+  }
+
   // ---------- 성경 퀴즈 / 성경 고사 탭 ----------
   function showSubject(key) {
     stamp("attend");
     var sub = SUBJECTS[key];
-    var st = subjectState(key);
     var total = sub.questions.length;
-    var today = dateKey();
 
-    var dailyStart = st.dailyLog[today] != null ? st.dailyLog[today] : st.dailyPointer;
+    var dailyStart = dailyStartFor(key);
     var dailyRange = (dailyStart + 1) + "–" + Math.min(dailyStart + 5, total) + "번";
 
     var modeButtons = h("div", { class: "mode-list" }, Object.keys(MODES).map(function (m) {
@@ -207,7 +263,7 @@
       if (kind === "done") doneCount++;
       grid.appendChild(h("div", { class: "cal-cell" + (k === todayKey ? " today" : "") }, [
         h("span", { class: "cal-day", text: String(d) }),
-        kind ? h("span", { class: "stamp " + kind, text: kind === "done" ? "완료" : "출석" }) : null
+        stampMark(kind)
       ]));
     }
 
@@ -477,5 +533,5 @@
     ]);
   }
 
-  showSubject("quiz");
+  showHome();
 })();
