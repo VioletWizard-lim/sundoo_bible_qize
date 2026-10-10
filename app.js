@@ -248,9 +248,20 @@
   }
 
   function leaveSession(session) {
-    if (session.index > 0 && session.results.length < session.list.length &&
-        !window.confirm("풀던 문제를 그만둘까요? 지금까지 푼 기록은 저장되지 않아요.")) return;
-    showSubject(session.key);
+    if (session.results.length === 0 || document.querySelector(".confirm-bar")) {
+      showSubject(session.key);
+      return;
+    }
+    // 브라우저 확인 창을 쓸 수 없는 환경도 있어 화면 안에서 묻습니다.
+    var bar = h("div", { class: "confirm-bar", role: "alertdialog" }, [
+      h("p", { text: "풀던 문제를 그만둘까요? 지금까지 푼 기록은 저장되지 않아요." }),
+      h("div", { class: "confirm-actions" }, [
+        h("button", { class: "ghost", text: "계속 풀기", onclick: function () { bar.remove(); } }),
+        h("button", { class: "primary", text: "그만두기", onclick: function () { showSubject(session.key); } })
+      ])
+    ]);
+    app.insertBefore(bar, app.firstChild);
+    window.scrollTo(0, 0);
   }
 
   function normalize(s) {
