@@ -30,7 +30,7 @@
   var backAction = null;
   var tabbar = document.getElementById("tabbar");
   var tabButtons = Array.prototype.slice.call(tabbar.querySelectorAll("[data-tab]"));
-  var EVENT_NAME = "2027 인천노회 어린이대회";
+  var EVENT_NAME = "2026 인천노회 어린이대회";
 
   // ---------- 저장소 ----------
   function loadStore() {
