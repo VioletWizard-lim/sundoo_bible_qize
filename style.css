@@ -111,40 +111,41 @@ main {
 .section-title { margin: 24px 4px 10px; font-size: 16px; }
 
 /* 홈 */
-.hero { text-align: center; padding: 20px 0 8px; }
-.hero h2 { margin: 4px 0 0; font-size: 24px; }
-.hero-sub { margin: 0; color: var(--muted); font-size: 14px; }
+.hero { padding: 8px 4px 16px; }
+.hero h2 { margin: 2px 0 4px; font-size: 24px; text-wrap: balance; }
+.hero-sub { margin: 0; color: var(--brand); font-size: 13px; font-weight: 700; letter-spacing: .02em; }
+.hero-desc { margin: 0; color: var(--muted); font-size: 14px; }
+.notice { margin: 18px 4px 0; color: var(--muted); font-size: 13px; text-align: center; }
 
-.subject-list { display: grid; gap: 14px; margin-top: 16px; }
-.subject-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  padding: 20px 18px;
-  text-align: left;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-}
-.subject-card:active { transform: scale(.99); }
-.subject-icon {
+/* 아래 탭 */
+body.has-tabbar main { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
   display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  flex: none;
-  border-radius: 14px;
-  font-size: 26px;
-  background: var(--brand-soft);
+  grid-template-columns: repeat(3, 1fr);
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  background: var(--card);
+  border-top: 1px solid var(--line);
 }
-.subject-exam .subject-icon { background: var(--blue-soft); }
-.subject-body { display: grid; gap: 2px; flex: 1; }
-.subject-body strong { font-size: 19px; }
-.subject-body small { color: var(--muted); font-size: 13px; }
-.subject-meta { margin-top: 4px; }
-.chev { font-size: 26px; color: var(--muted); }
+.tabbar button {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 6px 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.tab-icon { font-size: 20px; line-height: 1.2; filter: grayscale(1); opacity: .6; }
+.tabbar button.active { color: var(--brand); background: var(--brand-soft); }
+.tabbar button.active .tab-icon { filter: none; opacity: 1; }
 
 /* 과목 화면 */
 .today-banner {
@@ -341,7 +342,7 @@ main {
 }
 .primary { border: 0; background: var(--brand); color: var(--on-brand); }
 .primary:disabled { opacity: .4; }
-.primary[hidden], .ghost[hidden] { display: none; }
+.primary[hidden], .ghost[hidden], .tabbar[hidden] { display: none; }
 .ghost { border: 1px solid var(--line); background: var(--card); }
 
 /* 결과 */

@@ -28,6 +28,9 @@
   var titleEl = document.getElementById("title");
   var backBtn = document.getElementById("backBtn");
   var backAction = null;
+  var tabbar = document.getElementById("tabbar");
+  var tabButtons = Array.prototype.slice.call(tabbar.querySelectorAll("[data-tab]"));
+  var EVENT_NAME = "2027 인천노회 어린이대회";
 
   // ---------- 저장소 ----------
   function loadStore() {
@@ -38,15 +41,28 @@
     return {};
   }
   var store = loadStore();
+  migrateStamps();
 
   function saveStore() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) { /* 무시 */ }
   }
 
+  // 예전에는 과목마다 도장판이 따로 있었습니다. 하나의 도장판으로 합칩니다.
+  function migrateStamps() {
+    store.stamps = store.stamps || {};
+    Object.keys(SUBJECTS).forEach(function (key) {
+      var old = store[key] && store[key].stamps;
+      if (!old) return;
+      Object.keys(old).forEach(function (d) {
+        if (old[d] === "done" || !store.stamps[d]) store.stamps[d] = old[d];
+      });
+      delete store[key].stamps;
+    });
+  }
+
   function subjectState(key) {
     if (!store[key]) store[key] = {};
     var s = store[key];
-    s.stamps = s.stamps || {};       // { "2026-10-10": "attend" | "done" }
     s.dailyPointer = s.dailyPointer || 0;
     s.dailyLog = s.dailyLog || {};   // { "2026-10-10": 시작 번호 }
     return s;
@@ -58,11 +74,11 @@
   }
   function pad(n) { return (n < 10 ? "0" : "") + n; }
 
-  function stamp(key, kind) {
-    var s = subjectState(key);
+  // 성경 퀴즈·성경 고사 둘 중 하나라도 하면 그날 도장이 찍힙니다.
+  function stamp(kind) {
     var today = dateKey();
     // 완료(파란 도장)는 출석(초록 도장)을 덮어쓰고, 반대로는 바뀌지 않습니다.
-    if (kind === "done" || !s.stamps[today]) s.stamps[today] = kind;
+    if (kind === "done" || !store.stamps[today]) store.stamps[today] = kind;
     saveStore();
   }
 
@@ -85,10 +101,19 @@
     return el;
   }
 
-  function setScreen(title, onBack, nodes) {
+  // tab: 아래 탭 중 선택할 것. 문제를 푸는 중에는 null로 탭을 숨깁니다.
+  function setScreen(title, onBack, nodes, tab) {
     titleEl.textContent = title;
     backAction = onBack;
     backBtn.hidden = !onBack;
+    tabbar.hidden = !tab;
+    document.body.classList.toggle("has-tabbar", !!tab);
+    tabButtons.forEach(function (b) {
+      var on = b.getAttribute("data-tab") === tab;
+      b.classList.toggle("active", on);
+      if (on) b.setAttribute("aria-current", "page");
+      else b.removeAttribute("aria-current");
+    });
     app.innerHTML = "";
     nodes.forEach(function (n) { if (n) app.appendChild(n); });
     window.scrollTo(0, 0);
@@ -97,6 +122,15 @@
   backBtn.addEventListener("click", function () {
     if (backAction) backAction();
   });
+
+  tabButtons.forEach(function (b) {
+    b.addEventListener("click", function () { showTab(b.getAttribute("data-tab")); });
+  });
+
+  function showTab(tab) {
+    if (tab === "stamps") showStamps();
+    else showSubject(tab);
+  }
 
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
@@ -109,40 +143,17 @@
     return escapeHtml(text).replace(/\(\s*\)/g, '<span class="blank"></span>');
   }
 
-  // ---------- 1. 과목 선택 ----------
-  function showHome() {
-    var cards = Object.keys(SUBJECTS).map(function (key) {
-      var sub = SUBJECTS[key];
-      var st = subjectState(key);
-      var todayStamp = st.stamps[dateKey()];
-      return h("button", { class: "subject-card subject-" + key, onclick: function () { enterSubject(key); } }, [
-        h("span", { class: "subject-icon", text: sub.icon }),
-        h("span", { class: "subject-body" }, [
-          h("strong", { text: sub.name }),
-          h("small", { text: sub.desc }),
-          h("small", { class: "subject-meta", text: sub.questions.length + "문항" +
-            (todayStamp === "done" ? " · 오늘 완료 🔵" : todayStamp === "attend" ? " · 오늘 출석 🟢" : "") })
-        ]),
-        h("span", { class: "chev", text: "›" })
-      ]);
-    });
-
-    setScreen("성경 퀴즈 · 성경 고사", null, [
-      h("section", { class: "hero" }, [
-        h("p", { class: "hero-sub", text: "2027 경기북부노회 어린이대회" }),
-        h("h2", { text: "무엇을 공부할까요?" })
-      ]),
-      h("div", { class: "subject-list" }, cards)
+  function todayBanner() {
+    var done = store.stamps[dateKey()] === "done";
+    return h("div", { class: "today-banner " + (done ? "done" : "attend") }, [
+      h("span", { class: "mini-stamp " + (done ? "done" : "attend"), text: done ? "완료" : "출석" }),
+      h("span", { text: done ? "오늘 문제를 다 풀었어요! 파란 도장 꾹!" : "오늘 출석했어요! 문제를 끝까지 풀면 파란 도장으로 바뀌어요." })
     ]);
   }
 
-  function enterSubject(key) {
-    stamp(key, "attend");
-    showSubject(key);
-  }
-
-  // ---------- 2. 풀기 방식 선택 + 3. 도장판 ----------
-  function showSubject(key, viewMonth) {
+  // ---------- 성경 퀴즈 / 성경 고사 탭 ----------
+  function showSubject(key) {
+    stamp("attend");
     var sub = SUBJECTS[key];
     var st = subjectState(key);
     var total = sub.questions.length;
@@ -150,10 +161,9 @@
 
     var dailyStart = st.dailyLog[today] != null ? st.dailyLog[today] : st.dailyPointer;
     var dailyRange = (dailyStart + 1) + "–" + Math.min(dailyStart + 5, total) + "번";
-    var todayDone = st.stamps[today] === "done";
 
     var modeButtons = h("div", { class: "mode-list" }, Object.keys(MODES).map(function (m) {
-      var extra = m === "daily" ? "오늘: " + dailyRange : m === "all" ? total + "문제" : "매번 새로운 문제";
+      var extra = m === "daily" ? "오늘 " + dailyRange : m === "all" ? total + "문제" : "매번 새로 뽑기";
       return h("button", { class: "mode-card", onclick: function () { startSession(key, m); } }, [
         h("strong", { text: MODES[m].name }),
         h("small", { text: MODES[m].desc }),
@@ -161,20 +171,21 @@
       ]);
     }));
 
-    setScreen(sub.name, showHome, [
-      h("div", { class: "today-banner " + (todayDone ? "done" : "attend") }, [
-        h("span", { class: "mini-stamp " + (todayDone ? "done" : "attend"), text: todayDone ? "완료" : "출석" }),
-        h("span", { text: todayDone ? "오늘 문제를 다 풀었어요! 파란 도장 꾹!" : "오늘 출석했어요! 문제를 다 풀면 파란 도장으로 바뀌어요." })
+    setScreen(sub.name + " 예상문제", null, [
+      h("section", { class: "hero hero-" + key }, [
+        h("p", { class: "hero-sub", text: EVENT_NAME }),
+        h("h2", { text: sub.name + " 예상문제" }),
+        h("p", { class: "hero-desc", text: sub.desc + " · " + total + "문항" })
       ]),
+      todayBanner(),
       h("h3", { class: "section-title", text: "풀기 방식 선택" }),
       modeButtons,
-      h("h3", { class: "section-title", text: "날짜 도장판" }),
-      stampBoard(key, viewMonth)
-    ]);
+      h("p", { class: "notice", text: "실제 대회 문제가 아닌 예상문제입니다." })
+    ], key);
   }
 
-  function stampBoard(key, viewMonth) {
-    var st = subjectState(key);
+  // ---------- 도장판 탭 ----------
+  function showStamps(viewMonth) {
     var now = new Date();
     var month = viewMonth || new Date(now.getFullYear(), now.getMonth(), 1);
     var y = month.getFullYear(), m = month.getMonth();
@@ -191,28 +202,35 @@
     var attendCount = 0, doneCount = 0;
     for (var d = 1; d <= days; d++) {
       var k = y + "-" + pad(m + 1) + "-" + pad(d);
-      var kind = st.stamps[k];
+      var kind = store.stamps[k];
       if (kind === "attend") attendCount++;
       if (kind === "done") doneCount++;
-      var cell = h("div", { class: "cal-cell" + (k === todayKey ? " today" : "") }, [
+      grid.appendChild(h("div", { class: "cal-cell" + (k === todayKey ? " today" : "") }, [
         h("span", { class: "cal-day", text: String(d) }),
         kind ? h("span", { class: "stamp " + kind, text: kind === "done" ? "완료" : "출석" }) : null
-      ]);
-      grid.appendChild(cell);
+      ]));
     }
 
-    return h("section", { class: "board" }, [
-      h("div", { class: "board-nav" }, [
-        h("button", { class: "icon-btn", "aria-label": "이전 달", onclick: function () { showSubject(key, new Date(y, m - 1, 1)); }, text: "‹" }),
-        h("strong", { text: y + "년 " + (m + 1) + "월" }),
-        h("button", { class: "icon-btn", "aria-label": "다음 달", onclick: function () { showSubject(key, new Date(y, m + 1, 1)); }, text: "›" })
+    setScreen("도장판", null, [
+      h("section", { class: "hero" }, [
+        h("p", { class: "hero-sub", text: EVENT_NAME }),
+        h("h2", { text: "날짜 도장판" }),
+        h("p", { class: "hero-desc", text: "성경 퀴즈나 성경 고사 중 하나라도 하면 도장이 찍혀요." })
       ]),
-      grid,
-      h("div", { class: "legend" }, [
-        h("span", null, [h("span", { class: "dot attend" }), "출석 " + attendCount + "일"]),
-        h("span", null, [h("span", { class: "dot done" }), "문제 완료 " + doneCount + "일"])
-      ])
-    ]);
+      h("section", { class: "board" }, [
+        h("div", { class: "board-nav" }, [
+          h("button", { class: "icon-btn", "aria-label": "이전 달", onclick: function () { showStamps(new Date(y, m - 1, 1)); }, text: "‹" }),
+          h("strong", { text: y + "년 " + (m + 1) + "월" }),
+          h("button", { class: "icon-btn", "aria-label": "다음 달", onclick: function () { showStamps(new Date(y, m + 1, 1)); }, text: "›" })
+        ]),
+        grid,
+        h("div", { class: "legend" }, [
+          h("span", null, [h("span", { class: "dot attend" }), "출석 " + attendCount + "일"]),
+          h("span", null, [h("span", { class: "dot done" }), "문제 완료 " + doneCount + "일"])
+        ])
+      ]),
+      h("p", { class: "notice", text: "초록 도장: 출석 · 파란 도장: 고른 문제를 끝까지 푼 날" })
+    ], "stamps");
   }
 
   // ---------- 4. 문제 풀기 ----------
@@ -423,7 +441,7 @@
       }
     }
     saveStore();
-    stamp(session.key, "done");
+    stamp("done");
 
     var score = session.results.filter(function (r) { return r.correct; }).length;
     var total = session.results.length;
@@ -450,7 +468,7 @@
       ]),
       wrongList,
       h("div", { class: "actions" }, [
-        h("button", { class: "primary", text: "도장판으로", onclick: function () { showSubject(session.key); } }),
+        h("button", { class: "primary", text: "도장판 보기", onclick: function () { showStamps(); } }),
         h("button", { class: "ghost", text: "다시 풀기", onclick: function () {
           session.mode === "random" ? startSession(session.key, "random")
             : showQuestion({ key: session.key, mode: session.mode, list: session.list, index: 0, results: [] });
@@ -459,5 +477,5 @@
     ]);
   }
 
-  showHome();
+  showSubject("quiz");
 })();
