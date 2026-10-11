@@ -221,6 +221,35 @@ body.has-tabbar main { padding-bottom: calc(110px + env(safe-area-inset-bottom, 
 }
 .week-day.today .week-cell { outline: 2px solid var(--brand); outline-offset: -2px; }
 
+.event-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.dday {
+  display: grid;
+  place-items: center;
+  flex: none;
+  min-width: 92px;
+  padding: 14px 10px;
+  border-radius: 14px;
+  background: var(--brand);
+  color: var(--on-brand);
+}
+.dday strong { font-size: 26px; font-variant-numeric: tabular-nums; letter-spacing: -.5px; white-space: nowrap; }
+.event-card.today .dday { background: var(--blue); }
+.event-info { display: grid; gap: 2px; margin: 0; min-width: 0; }
+.event-info div { display: flex; gap: 8px; }
+.event-info dt { flex: none; width: 3.2em; color: var(--muted); font-size: 13px; line-height: 1.7; }
+.event-info dd { margin: 0; font-weight: 700; }
+.event-msg { margin: 4px 0 0; color: var(--brand); font-size: 13px; font-weight: 600; }
+
 /* 과목 화면 */
 .today-banner {
   display: flex;

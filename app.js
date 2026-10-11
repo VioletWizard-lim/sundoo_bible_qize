@@ -31,6 +31,8 @@
   var tabbar = document.getElementById("tabbar");
   var tabButtons = Array.prototype.slice.call(tabbar.querySelectorAll("[data-tab]"));
   var EVENT_NAME = "2026 인천노회 어린이대회";
+  var EVENT_DATE = new Date(2026, 10, 7); // 2026년 11월 7일 (토)
+  var EVENT_PLACE = "참빛교회";
 
   // ---------- 저장소 ----------
   function loadStore() {
@@ -162,6 +164,29 @@
     return kind ? h("span", { class: "stamp " + kind, text: kind === "done" ? "완료" : "출석" }) : null;
   }
 
+  // 대회날까지 남은 날 (오늘이 대회날이면 0)
+  function daysUntilEvent() {
+    var now = new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.round((EVENT_DATE - today) / 86400000);
+  }
+
+  function eventCard() {
+    var left = daysUntilEvent();
+    var dday = left > 0 ? "D-" + left : left === 0 ? "D-DAY" : "D+" + (-left);
+    var msg = left > 0 ? "대회까지 " + left + "일 남았어요" : left === 0 ? "오늘이 대회날이에요! 힘내요!" : "대회가 끝났어요. 수고했어요!";
+    var week = ["일", "월", "화", "수", "목", "금", "토"][EVENT_DATE.getDay()];
+    return h("section", { class: "event-card" + (left === 0 ? " today" : "") }, [
+      h("div", { class: "dday" }, [h("strong", { text: dday })]),
+      h("dl", { class: "event-info" }, [
+        h("div", null, [h("dt", { text: "대회날" }),
+          h("dd", { text: EVENT_DATE.getFullYear() + "년 " + (EVENT_DATE.getMonth() + 1) + "월 " + EVENT_DATE.getDate() + "일 (" + week + ")" })]),
+        h("div", null, [h("dt", { text: "장소" }), h("dd", { text: EVENT_PLACE })]),
+        h("p", { class: "event-msg", text: msg })
+      ])
+    ]);
+  }
+
   // ---------- 홈 탭 ----------
   function showHome() {
     stamp("attend");
@@ -199,6 +224,7 @@
         h("h2", { text: "성경 예상문제" }),
         h("p", { class: "hero-desc", text: "오늘은 무엇을 공부할까요?" })
       ]),
+      eventCard(),
       todayBanner(),
       h("div", { class: "subject-list" }, cards),
       h("button", { class: "week-card", onclick: function () { showStamps(); } }, [
