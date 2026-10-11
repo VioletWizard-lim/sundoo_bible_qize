@@ -26,3 +26,7 @@ python3 tools/parse_pdf_text.py quiz.txt data/quiz.js QUIZ_QUESTIONS
 pdftotext -layout 성경고사.pdf exam.txt
 python3 tools/parse_pdf_text.py exam.txt data/exam.js EXAM_QUESTIONS
 ```
+
+## 아이콘
+
+`icons/icon.svg`가 원본입니다. 휴대폰에서 GitHub Pages 주소를 연 뒤 "홈 화면에 추가"하면 이 아이콘으로 앱처럼 설치됩니다.
