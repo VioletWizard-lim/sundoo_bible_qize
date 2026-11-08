@@ -26,6 +26,7 @@
       name: "성경 퀴즈",
       title: "성경 퀴즈 예상문제",
       org: EVENT_NAME,
+      optional: true, // 기본으로 숨김. 홈에서 '대회 문제 보기'를 켜면 보입니다.
       desc: "에스라 · 느헤미야 · 에스더 · 욥기 · 잠언 · 전도서 · 아가",
       icon: "📖",
       notice: "실제 대회 문제가 아닌 예상문제입니다.",
@@ -35,6 +36,7 @@
       name: "성경 고사",
       title: "성경 고사 예상문제",
       org: EVENT_NAME,
+      optional: true, // 기본으로 숨김. 홈에서 '대회 문제 보기'를 켜면 보입니다.
       desc: "킹덤 스토리 2-1·2-2 (1–48과)",
       icon: "✏️",
       notice: "실제 대회 문제가 아닌 예상문제입니다.",
@@ -127,6 +129,17 @@
     return el;
   }
 
+  // 성경 퀴즈·성경 고사(optional)는 사용자가 켰을 때만 보입니다.
+  function isVisible(key) {
+    return !SUBJECTS[key].optional || !!store.showOptional;
+  }
+
+  function toggleOptional() {
+    store.showOptional = !store.showOptional;
+    saveStore();
+    showHome();
+  }
+
   // tab: 아래 탭 중 선택할 것. 문제를 푸는 중에는 null로 탭을 숨깁니다.
   function setScreen(title, onBack, nodes, tab) {
     titleEl.textContent = title;
@@ -135,7 +148,9 @@
     tabbar.hidden = !tab;
     document.body.classList.toggle("has-tabbar", !!tab);
     tabButtons.forEach(function (b) {
-      var on = b.getAttribute("data-tab") === tab;
+      var key = b.getAttribute("data-tab");
+      b.hidden = !!SUBJECTS[key] && !isVisible(key);
+      var on = key === tab;
       b.classList.toggle("active", on);
       if (on) b.setAttribute("aria-current", "page");
       else b.removeAttribute("aria-current");
@@ -222,7 +237,7 @@
   // ---------- 홈 탭 ----------
   function showHome() {
     stamp("attend");
-    var cards = Object.keys(SUBJECTS).map(function (key) {
+    var cards = Object.keys(SUBJECTS).filter(isVisible).map(function (key) {
       var sub = SUBJECTS[key];
       var start = dailyStartFor(key);
       var total = sub.questions.length;
@@ -258,6 +273,13 @@
       h("div", { class: "event-list" }, upcomingEventCards()),
       todayBanner(),
       h("div", { class: "subject-list" }, cards),
+      h("button", { class: "optional-toggle", "aria-pressed": String(!!store.showOptional), onclick: toggleOptional }, [
+        h("span", null, [
+          h("strong", { text: store.showOptional ? "인천노회 대회 문제 숨기기" : "인천노회 대회 문제 보기" }),
+          h("small", { text: "성경 퀴즈 · 성경 고사 예상문제" })
+        ]),
+        h("span", { class: "switch" + (store.showOptional ? " on" : ""), "aria-hidden": "true" })
+      ]),
       h("button", { class: "week-card", onclick: function () { showStamps(); } }, [
         h("span", { class: "week-title" }, [h("strong", { text: "이번 주 도장" }), h("span", { class: "chev", "aria-hidden": "true", text: "›" })]),
         week
