@@ -28,6 +28,7 @@
     },
     basics: {
       name: "신앙 기초",
+      when: "초등 2부 12월 6일 실시",
       title: "신.기.탄! 신앙 기초 탄탄 테스트",
       org: "2026 선두교회 J-Family",
       desc: "성경 66권 · 십계명 · 신앙 기초 문답",
@@ -215,7 +216,7 @@
       return h("button", { class: "subject-card subject-" + key, onclick: function () { showSubject(key); } }, [
         h("span", { class: "subject-icon", "aria-hidden": "true", text: sub.icon }),
         h("span", { class: "subject-body" }, [
-          h("strong", { text: sub.name }),
+          h("strong", null, [sub.name, sub.when ? h("span", { class: "subject-when", text: "(" + sub.when + ")" }) : null]),
           h("small", { text: sub.desc }),
           h("span", { class: "subject-next", text: "오늘 " + (start + 1) + "–" + Math.min(start + 5, total) + "번 차례" })
         ]),
@@ -271,7 +272,7 @@
 
     setScreen(sub.title, null, [
       h("section", { class: "hero hero-" + key }, [
-        h("p", { class: "hero-sub", text: sub.org }),
+        h("p", { class: "hero-sub", text: sub.org + (sub.when ? " · " + sub.when : "") }),
         h("h2", { text: sub.title }),
         h("p", { class: "hero-desc", text: sub.desc + " · " + total + "문항" })
       ]),

@@ -181,6 +181,7 @@ body.has-tabbar main { padding-bottom: calc(110px + env(safe-area-inset-bottom, 
 .subject-basics .subject-icon { background: var(--green-soft); }
 .subject-body { display: grid; gap: 2px; flex: 1; min-width: 0; }
 .subject-body strong { font-size: 19px; }
+.subject-when { margin-left: 6px; color: var(--muted); font-size: 13px; font-weight: 600; }
 .subject-body small { color: var(--muted); font-size: 13px; }
 .subject-next {
   justify-self: start;
