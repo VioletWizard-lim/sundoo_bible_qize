@@ -12,6 +12,16 @@
 
   // org: 출처, title: 과목 화면 제목, notice: 과목 화면 아래 안내
   var SUBJECTS = {
+    basics: {
+      name: "신앙 기초",
+      when: "초등 2부 12월 6일 실시",
+      title: "신.기.탄! 신앙 기초 탄탄 테스트",
+      org: "2026 선두교회 J-Family",
+      desc: "성경 66권 · 십계명 · 신앙 기초 문답",
+      icon: "🌱",
+      notice: "서술형 문제는 정답과 비교해 보고, 같은 뜻이면 직접 정답 처리하세요.",
+      questions: window.BASICS_QUESTIONS || []
+    },
     quiz: {
       name: "성경 퀴즈",
       title: "성경 퀴즈 예상문제",
@@ -29,17 +39,8 @@
       icon: "✏️",
       notice: "실제 대회 문제가 아닌 예상문제입니다.",
       questions: window.EXAM_QUESTIONS || []
-    },
-    basics: {
-      name: "신앙 기초",
-      when: "초등 2부 12월 6일 실시",
-      title: "신.기.탄! 신앙 기초 탄탄 테스트",
-      org: "2026 선두교회 J-Family",
-      desc: "성경 66권 · 십계명 · 신앙 기초 문답",
-      icon: "🌱",
-      notice: "서술형 문제는 정답과 비교해 보고, 같은 뜻이면 직접 정답 처리하세요.",
-      questions: window.BASICS_QUESTIONS || []
     }
+
   };
 
   var MODES = {
