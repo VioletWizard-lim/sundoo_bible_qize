@@ -3,8 +3,12 @@
 
   var APP_NAME = "교회 성경 퀴즈";
   var EVENT_NAME = "2026 인천노회 어린이대회";
-  var EVENT_DATE = new Date(2026, 10, 7); // 2026년 11월 7일 (토)
-  var EVENT_PLACE = "참빛교회";
+  // 홈에 D-day로 보여 줄 일정. 날짜가 지나면 홈에서 사라집니다.
+  // kind는 안내 문구에 쓰입니다 ("대회까지 n일", "시험까지 n일").
+  var EVENTS = [
+    { title: EVENT_NAME, kind: "대회", date: new Date(2026, 10, 7), place: "참빛교회" },
+    { title: "신앙 기초 테스트 (초등 2부)", kind: "시험", date: new Date(2026, 11, 6) }
+  ];
 
   // org: 출처, title: 과목 화면 제목, notice: 과목 화면 아래 안내
   var SUBJECTS = {
@@ -183,27 +187,35 @@
     return kind ? h("span", { class: "stamp " + kind, text: kind === "done" ? "완료" : "출석" }) : null;
   }
 
-  // 대회날까지 남은 날 (오늘이 대회날이면 0)
-  function daysUntilEvent() {
+  // 일정까지 남은 날 (오늘이 그날이면 0, 지났으면 음수)
+  function daysUntil(date) {
     var now = new Date();
     var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    return Math.round((EVENT_DATE - today) / 86400000);
+    return Math.round((date - today) / 86400000);
   }
 
-  function eventCard() {
-    var left = daysUntilEvent();
-    var dday = left > 0 ? "D-" + left : left === 0 ? "D-DAY" : "D+" + (-left);
-    var msg = left > 0 ? "대회까지 " + left + "일 남았어요" : left === 0 ? "오늘이 대회날이에요! 힘내요!" : "대회가 끝났어요. 수고했어요!";
-    var week = ["일", "월", "화", "수", "목", "금", "토"][EVENT_DATE.getDay()];
+  function eventCard(ev) {
+    var left = daysUntil(ev.date);
+    var dday = left > 0 ? "D-" + left : "D-DAY";
+    var msg = left > 0 ? ev.kind + "까지 " + left + "일 남았어요" : "오늘이 " + ev.kind + "날이에요! 힘내요!";
+    var week = ["일", "월", "화", "수", "목", "금", "토"][ev.date.getDay()];
     return h("section", { class: "event-card" + (left === 0 ? " today" : "") }, [
       h("div", { class: "dday" }, [h("strong", { text: dday })]),
       h("dl", { class: "event-info" }, [
-        h("div", null, [h("dt", { text: "대회날" }),
-          h("dd", { text: EVENT_DATE.getFullYear() + "년 " + (EVENT_DATE.getMonth() + 1) + "월 " + EVENT_DATE.getDate() + "일 (" + week + ")" })]),
-        h("div", null, [h("dt", { text: "장소" }), h("dd", { text: EVENT_PLACE })]),
+        h("p", { class: "event-title", text: ev.title }),
+        h("div", null, [h("dt", { text: "날짜" }),
+          h("dd", { text: ev.date.getFullYear() + "년 " + (ev.date.getMonth() + 1) + "월 " + ev.date.getDate() + "일 (" + week + ")" })]),
+        ev.place ? h("div", null, [h("dt", { text: "장소" }), h("dd", { text: ev.place })]) : null,
         h("p", { class: "event-msg", text: msg })
       ])
     ]);
+  }
+
+  // 아직 지나지 않은 일정만 가까운 순서로
+  function upcomingEventCards() {
+    return EVENTS.filter(function (ev) { return daysUntil(ev.date) >= 0; })
+      .sort(function (x, y) { return x.date - y.date; })
+      .map(eventCard);
   }
 
   // ---------- 홈 탭 ----------
@@ -242,7 +254,7 @@
         h("h2", { text: APP_NAME }),
         h("p", { class: "hero-desc", text: "오늘은 무엇을 공부할까요?" })
       ]),
-      daysUntilEvent() >= 0 ? eventCard() : null,
+      h("div", { class: "event-list" }, upcomingEventCards()),
       todayBanner(),
       h("div", { class: "subject-list" }, cards),
       h("button", { class: "week-card", onclick: function () { showStamps(); } }, [

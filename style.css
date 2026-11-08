@@ -227,7 +227,6 @@ body.has-tabbar main { padding-bottom: calc(110px + env(safe-area-inset-bottom, 
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 12px;
   padding: 16px;
   background: var(--card);
   border: 1px solid var(--line);
@@ -250,6 +249,9 @@ body.has-tabbar main { padding-bottom: calc(110px + env(safe-area-inset-bottom, 
 .event-info div { display: flex; gap: 8px; }
 .event-info dt { flex: none; width: 3.2em; color: var(--muted); font-size: 13px; line-height: 1.7; }
 .event-info dd { margin: 0; font-weight: 700; }
+.event-list { display: grid; gap: 10px; margin-bottom: 12px; }
+.event-list:empty { display: none; }
+.event-title { margin: 0 0 2px; font-weight: 800; font-size: 15px; }
 .event-msg { margin: 4px 0 0; color: var(--brand); font-size: 13px; font-weight: 600; }
 
 /* 과목 화면 */
