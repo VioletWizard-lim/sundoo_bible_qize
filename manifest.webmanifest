@@ -1,6 +1,6 @@
 {
-  "name": "인천노회 성경 예상문제",
-  "short_name": "성경 예상문제",
+  "name": "교회 성경 퀴즈",
+  "short_name": "교회 성경 퀴즈",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f6f3ec",

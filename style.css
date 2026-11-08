@@ -125,9 +125,9 @@ body.has-tabbar main { padding-bottom: calc(110px + env(safe-area-inset-bottom, 
   bottom: calc(12px + env(safe-area-inset-bottom, 0px));
   z-index: 5;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  width: min(calc(100% - 32px), 420px);
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  width: min(calc(100% - 24px), 460px);
   padding: 6px;
   transform: translateX(-50%);
   background: var(--card);
@@ -178,6 +178,7 @@ body.has-tabbar main { padding-bottom: calc(110px + env(safe-area-inset-bottom, 
   background: var(--brand-soft);
 }
 .subject-exam .subject-icon { background: var(--blue-soft); }
+.subject-basics .subject-icon { background: var(--green-soft); }
 .subject-body { display: grid; gap: 2px; flex: 1; min-width: 0; }
 .subject-body strong { font-size: 19px; }
 .subject-body small { color: var(--muted); font-size: 13px; }
@@ -429,6 +430,7 @@ body.has-tabbar main { padding-bottom: calc(110px + env(safe-area-inset-bottom, 
 .feedback[hidden] { display: none; }
 .feedback.ok { background: var(--green-soft); }
 .feedback.no { background: var(--red-soft); }
+.feedback.compare { background: var(--blue-soft); }
 .feedback p { margin: 0 0 6px; }
 .verdict { font-weight: 800; font-size: 17px; }
 .answer-line b, .explain b, .source b, .my-answer b { display: inline-block; min-width: 2.6em; color: var(--muted); font-size: 13px; }

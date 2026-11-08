@@ -1,24 +1,45 @@
 (function () {
   "use strict";
 
+  var APP_NAME = "교회 성경 퀴즈";
+  var EVENT_NAME = "2026 인천노회 어린이대회";
+  var EVENT_DATE = new Date(2026, 10, 7); // 2026년 11월 7일 (토)
+  var EVENT_PLACE = "참빛교회";
+
+  // org: 출처, title: 과목 화면 제목, notice: 과목 화면 아래 안내
   var SUBJECTS = {
     quiz: {
       name: "성경 퀴즈",
+      title: "성경 퀴즈 예상문제",
+      org: EVENT_NAME,
       desc: "에스라 · 느헤미야 · 에스더 · 욥기 · 잠언 · 전도서 · 아가",
       icon: "📖",
+      notice: "실제 대회 문제가 아닌 예상문제입니다.",
       questions: window.QUIZ_QUESTIONS || []
     },
     exam: {
       name: "성경 고사",
+      title: "성경 고사 예상문제",
+      org: EVENT_NAME,
       desc: "킹덤 스토리 2-1·2-2 (1–48과)",
       icon: "✏️",
+      notice: "실제 대회 문제가 아닌 예상문제입니다.",
       questions: window.EXAM_QUESTIONS || []
+    },
+    basics: {
+      name: "신앙 기초",
+      title: "신.기.탄! 신앙 기초 탄탄 테스트",
+      org: "2026 선두교회 J-Family",
+      desc: "성경 66권 · 십계명 · 신앙 기초 문답",
+      icon: "🌱",
+      notice: "서술형 문제는 정답과 비교해 보고, 같은 뜻이면 직접 정답 처리하세요.",
+      questions: window.BASICS_QUESTIONS || []
     }
   };
 
   var MODES = {
     daily: { name: "하루에 5문제", desc: "1번부터 차례대로 매일 5문제씩" },
-    all: { name: "100문제 풀기", desc: "전체 문제를 처음부터 끝까지" },
+    all: { name: "전체 문제 풀기", desc: "전체 문제를 처음부터 끝까지" },
     random: { name: "랜덤 5문제", desc: "무작위로 고른 5문제" }
   };
 
@@ -30,9 +51,6 @@
   var backAction = null;
   var tabbar = document.getElementById("tabbar");
   var tabButtons = Array.prototype.slice.call(tabbar.querySelectorAll("[data-tab]"));
-  var EVENT_NAME = "2026 인천노회 어린이대회";
-  var EVENT_DATE = new Date(2026, 10, 7); // 2026년 11월 7일 (토)
-  var EVENT_PLACE = "참빛교회";
 
   // ---------- 저장소 ----------
   function loadStore() {
@@ -218,24 +236,22 @@
       ]);
     }));
 
-    setScreen("인천노회 성경 예상문제", null, [
+    setScreen(APP_NAME, null, [
       h("section", { class: "hero" }, [
-        h("p", { class: "hero-sub", text: EVENT_NAME }),
-        h("h2", { text: "성경 예상문제" }),
+        h("h2", { text: APP_NAME }),
         h("p", { class: "hero-desc", text: "오늘은 무엇을 공부할까요?" })
       ]),
-      eventCard(),
+      daysUntilEvent() >= 0 ? eventCard() : null,
       todayBanner(),
       h("div", { class: "subject-list" }, cards),
       h("button", { class: "week-card", onclick: function () { showStamps(); } }, [
         h("span", { class: "week-title" }, [h("strong", { text: "이번 주 도장" }), h("span", { class: "chev", "aria-hidden": "true", text: "›" })]),
         week
-      ]),
-      h("p", { class: "notice", text: "실제 대회 문제가 아닌 예상문제입니다." })
+      ])
     ], "home");
   }
 
-  // ---------- 성경 퀴즈 / 성경 고사 탭 ----------
+  // ---------- 과목 탭 (성경 퀴즈 / 성경 고사 / 신앙 기초) ----------
   function showSubject(key) {
     stamp("attend");
     var sub = SUBJECTS[key];
@@ -247,22 +263,22 @@
     var modeButtons = h("div", { class: "mode-list" }, Object.keys(MODES).map(function (m) {
       var extra = m === "daily" ? "오늘 " + dailyRange : m === "all" ? total + "문제" : "매번 새로 뽑기";
       return h("button", { class: "mode-card", onclick: function () { startSession(key, m); } }, [
-        h("strong", { text: MODES[m].name }),
+        h("strong", { text: m === "all" ? total + "문제 풀기" : MODES[m].name }),
         h("small", { text: MODES[m].desc }),
         h("span", { class: "mode-extra", text: extra })
       ]);
     }));
 
-    setScreen(sub.name + " 예상문제", null, [
+    setScreen(sub.title, null, [
       h("section", { class: "hero hero-" + key }, [
-        h("p", { class: "hero-sub", text: EVENT_NAME }),
-        h("h2", { text: sub.name + " 예상문제" }),
+        h("p", { class: "hero-sub", text: sub.org }),
+        h("h2", { text: sub.title }),
         h("p", { class: "hero-desc", text: sub.desc + " · " + total + "문항" })
       ]),
       todayBanner(),
       h("h3", { class: "section-title", text: "풀기 방식 선택" }),
       modeButtons,
-      h("p", { class: "notice", text: "실제 대회 문제가 아닌 예상문제입니다." })
+      h("p", { class: "notice", text: sub.notice })
     ], key);
   }
 
@@ -295,9 +311,8 @@
 
     setScreen("도장판", null, [
       h("section", { class: "hero" }, [
-        h("p", { class: "hero-sub", text: EVENT_NAME }),
         h("h2", { text: "날짜 도장판" }),
-        h("p", { class: "hero-desc", text: "성경 퀴즈나 성경 고사 중 하나라도 하면 도장이 찍혀요." })
+        h("p", { class: "hero-desc", text: "성경 퀴즈·성경 고사·신앙 기초 중 하나라도 하면 도장이 찍혀요." })
       ]),
       h("section", { class: "board" }, [
         h("div", { class: "board-nav" }, [
@@ -386,6 +401,8 @@
   function isShortCorrect(q, input) {
     var v = normalize(input);
     if (!v) return false;
+    // 핵심어가 정해진 문제는 핵심어가 모두 들어 있으면 순서와 상관없이 정답입니다.
+    if (q.keywords && q.keywords.every(function (k) { return v.indexOf(normalize(k)) >= 0; })) return true;
     return acceptedAnswers(q).some(function (a) {
       var n = normalize(a);
       // '세 번' ↔ '3번'처럼 숫자를 섞어 쓰는 경우를 대비해 핵심어 포함도 인정합니다.
@@ -485,9 +502,11 @@
 
     function renderFeedback(result, answerText) {
       feedback.hidden = false;
-      feedback.className = "feedback " + (result.correct ? "ok" : "no");
+      // 서술형(self)은 자동 채점이 어려워 정답과 비교해 보게 합니다.
+      var compare = q.self && !result.correct;
+      feedback.className = "feedback " + (result.correct ? "ok" : compare ? "compare" : "no");
       feedback.innerHTML = "";
-      feedback.appendChild(h("p", { class: "verdict", text: result.correct ? "⭕ 정답이에요!" : "❌ 아쉬워요!" }));
+      feedback.appendChild(h("p", { class: "verdict", text: result.correct ? "⭕ 정답이에요!" : compare ? "📝 정답과 비교해 보세요" : "❌ 아쉬워요!" }));
       feedback.appendChild(h("p", { class: "answer-line" }, [h("b", { text: "정답 " }), answerText]));
       if (q.explanation) feedback.appendChild(h("p", { class: "explain" }, [h("b", { text: "해설 " }), q.explanation]));
       if (q.source) feedback.appendChild(h("p", { class: "source" }, [h("b", { text: "근거 " }), q.source]));
@@ -519,7 +538,8 @@
       var start = st.dailyLog[dateKey()];
       // 오늘 분량을 처음 끝냈을 때만 다음 날 시작 번호를 넘깁니다.
       if (st.dailyPointer === start) {
-        st.dailyPointer = (start + 5) % SUBJECTS[session.key].questions.length;
+        var next = start + 5;
+        st.dailyPointer = next >= SUBJECTS[session.key].questions.length ? 0 : next;
       }
     }
     saveStore();
